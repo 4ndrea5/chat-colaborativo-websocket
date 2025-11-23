@@ -1,31 +1,16 @@
-const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: 8080 });
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat WebSocket</title>
+</head>
+<body>
+  <h2>Chat Colaborativo</h2>
+  <div id="chat"></div>
 
-let users = new Map();
+  <input type="text" id="msg" placeholder="Escribe un mensaje...">
+  <button onclick="sendMessage()">Enviar</button>
 
-wss.on('connection', (ws) => {
-    const userId = `Usuario_${Math.floor(Math.random() * 1000)}`;
-    users.set(ws, userId);
-
-    ws.send(`Bienvenido ${userId}`);
-    broadcast(`${userId} se ha unido al chat`);
-
-    ws.on('message', (msg) => {
-        broadcast(`${userId}: ${msg}`);
-    });
-
-    ws.on('close', () => {
-        broadcast(`${userId} se ha desconectado`);
-        users.delete(ws);
-    });
-});
-
-function broadcast(message) {
-    wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(message);
-        }
-    });
-}
-
-console.log("Servidor WebSocket corriendo en ws://localhost:8080");
+  <script src="app.js"></script>
+</body>
+</html>
