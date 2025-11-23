@@ -1,31 +1,29 @@
-const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: 8080 });
+import http from "http";
+import app from "./src/app.js";
+import { sequelize } from "./src/config/db.js";
+import { chatSocketServer } from "./src/ws/chatSocket.js";
 
-let users = new Map();
+const server = http.createServer(app);
 
-wss.on('connection', (ws) => {
-    const userId = `Usuario_${Math.floor(Math.random() * 1000)}`;
-    users.set(ws, userId);
-
-    ws.send(`Bienvenido ${userId}`);
-    broadcast(`${userId} se ha unido al chat`);
-
-    ws.on('message', (msg) => {
-        broadcast(`${userId}: ${msg}`);
+// Manejar upgrade de WS
+server.on("upgrade", (req, socket, head) => {
+  const urlParts = req.url.split("/");
+  if (urlParts[1] === "ws" && urlParts[2] === "chat") {
+    const chatId = urlParts[3];
+    chatSocketServer.handleUpgrade(req, socket, head, (ws) => {
+      chatSocketServer.emit("connection", ws, req, chatId);
     });
-
-    ws.on('close', () => {
-        broadcast(`${userId} se ha desconectado`);
-        users.delete(ws);
-    });
+  } else {
+    socket.destroy();
+  }
 });
 
-function broadcast(message) {
-    wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(message);
-        }
-    });
-}
-
-console.log("Servidor WebSocket corriendo en ws://localhost:8080");
+// Conectar DB y levantar server
+(async () => {
+  try {
+    await sequelize.sync();
+    server.listen(4000, () => console.log("Server running on port 4000"));
+  } catch (err) {
+    console.error(err);
+  }
+})();

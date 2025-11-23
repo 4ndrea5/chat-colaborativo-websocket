@@ -1,190 +1,189 @@
-###Historias de usuario
+# **README – Configuración de Autenticación con Google (Node.js + React)**
 
-HU1 — Registro de Usuario
-Como nuevo usuario
-quiero crear una cuenta en el sistema
-para poder usar el chat colaborativo.
+Este documento explica paso a paso cómo configurar las **credenciales de Google**, cómo añadirlas al archivo **.env**, y qué dependencias instalar para que la autenticación Google funcione correctamente en tu proyecto **Node.js (server)** y **React (client)**.
 
-Criterios de aceptación:
+---
 
-Debe pedir: nombre, email, contraseña.
+# ## **1. Crear credenciales en Google Cloud (paso a paso)**
 
-Validar email único.
+### **1.1 Abrir la consola de Google**
 
-En caso de fallo, mostrar mensaje claro.
+1. Ve a **Google Cloud Console** → **APIs & Services** → **OAuth consent screen**.
+2. Selecciona el tipo de acceso:
 
-Guardar usuario en base de datos.
+   * **External** → si tu aplicación será usada por cualquier usuario con cuenta Google.
+   * **Internal** → solo usuarios de tu organización (Google Workspace).
+3. Completa:
 
-HU2 — Inicio de Sesión
+   * Nombre de la app
+   * Correo de soporte
+   * Logo (opcional)
+   * Dominios autorizados
+4. Guarda los cambios.
 
-Como usuario registrado
-quiero iniciar sesión
-para acceder a mis salas de chat.
+### **1.2 Habilitar APIs (opcional pero recomendado)**
 
-Criterios:
+Si tu app usará servicios adicionales de Google, habilítalos en:
 
-Validar email y contraseña.
+**APIs & Services → Library**
 
-Generar token JWT.
+> Para el login básico *no es obligatorio*, pero si consumirás otras APIs, actívalas allí.
 
-Guardar sesión en localStorage.
+### **1.3 Crear credenciales OAuth**
 
-Mostrar mensaje si las credenciales son incorrectas.
+1. Ve a: **APIs & Services → Credentials → Create Credentials → OAuth client ID**
+2. Configura lo siguiente:
 
-HU3 — Crear Sala de Chat
+#### **Application type:**
 
-Como usuario autenticado
-quiero crear una sala de chat
-para invitar a otros usuarios y conversar.
+✔ Web application
 
-Criterios:
+#### **Name:**
 
-Permitir asignar nombre de sala.
+`chat-grupal-web`
 
-Generar ID único.
+#### **Authorized JavaScript origins:**
 
-Guardar en base de datos.
+Ejemplos:
 
-Usuario creador queda unido automáticamente.
+```
+http://localhost:3000
+https://mi-dominio.com
+```
 
-HU4 — Unirse a Sala de Chat
+#### **Authorized redirect URIs:**
 
-Como usuario autenticado
-quiero unirme a una sala existente
-para poder participar en una conversación.
+(Útiles solo si usas OAuth con redirección, no necesarios para Google One Tap / GSI)
 
-Criterios:
+```
+http://localhost:3000/auth/google/callback
+https://mi-dominio.com/auth/google/callback
+```
 
-Permitir ingresar código o seleccionar sala.
+### **1.4 Obtener credenciales**
 
-Validar que la sala exista.
+Google generará:
 
-Agregar usuario al listado de miembros.
+* **Client ID**
+* **Client Secret**
 
-HU5 — Asignación Automática de Usuario Temporal
+Guarda ambos **solo en el servidor**, nunca en el frontend.
 
-Como usuario que entra al WebSocket
-quiero recibir un nombre temporal automático
-para identificarme aunque no haya puesto un nombre real.
+---
 
-Ej: "Usuario_847"
+# ## **2. Variables de entorno (.env)**
 
-HU6 — Enviar Mensajes en Tiempo Real
+Tu proyecto debe tener **dos archivos .env**: uno para el **client** (React) y otro para el **server** (Node.js).
 
-Como usuario en una sala
-quiero enviar mensajes y recibirlos al instante
-para mantener comunicación fluida.
+---
 
-Criterios:
+## **2.1 Archivo: `client/.env`**
 
-Solo WebSockets, no polling.
+```env
+VITE_GOOGLE_CLIENT_ID=TU_CLIENT_ID_AQUÍ
+```
 
-Todos los usuarios conectados deben recibir el mensaje.
+> Este valor es de acceso público porque el frontend lo necesita para el botón de login.
 
-Guardar historial en BD.
+---
 
-HU7 — Notificar Entradas y Salidas
+## **2.2 Archivo: `server/.env`**
 
-Como participante del chat
-quiero recibir avisos cuando alguien entra o sale
-para saber quién está conectado.
+```env
+GOOGLE_CLIENT_ID=TU_CLIENT_ID_AQUÍ
+GOOGLE_CLIENT_SECRET=TU_CLIENT_SECRET_AQUÍ
 
-Ejemplo:
+DATABASE_URL="postgresql://postgres:jafetcana@localhost:5432/chatcolab"
 
-🔵 "Juan se ha unido al chat"
+DB_NAME=chatcolab
+DB_PORT=5432
+DB_USER=postgres
+DB_PASS=password
+DB_HOST=localhost
 
-🔴 "María ha salido"
+SESSION_SECRET=MiClaveUltraSegura
+```
 
-HU8 — Mostrar Historial de Chat
+---
 
-Como usuario que entra a una sala
-quiero ver los mensajes anteriores
-para entender el contexto del chat.
+# ## **3. Instalación de dependencias necesarias**
 
-HU9 — Cerrar Sesión
+### **3.1 Dependencias del servidor (Node.js)**
 
-Como usuario autenticado
-quiero cerrar mi sesión
-para proteger mi cuenta en dispositivos públicos.
+Ejecuta:
 
-Estructura
-server/
-│
-├── src/
-│   ├── config/
-│   │   ├── db.js                 # conexión a la base de datos
-│   │   └── websocket.js          # inicialización WebSocket
-│   │
-│   ├── controllers/
-│   │   ├── authController.js     # registro, login
-│   │   ├── chatController.js     # crear sala, unirse, listar salas
-│   │   └── messageController.js  # obtener historial
-│   │
-│   ├── services/
-│   │   ├── authService.js        # lógica de auth
-│   │   ├── chatService.js        # lógica de salas
-│   │   └── messageService.js     # lógica de mensajes
-│   │
-│   ├── middlewares/
-│   │   └── authMiddleware.js     # verifica token JWT
-│   │
-│   ├── models/
-│   │   ├── User.js               # modelo usuario
-│   │   ├── Chat.js               # modelo sala
-│   │   └── Message.js            # modelo mensaje
-│   │
-│   ├── routes/
-│   │   ├── authRoutes.js         # /auth/register /auth/login
-│   │   ├── chatRoutes.js         # /chat/create /chat/join
-│   │   └── messageRoutes.js      # /messages/:chatId
-│   │
-│   ├── websocket/
-│   │   ├── wsServer.js           # servidor WebSocket principal
-│   │   ├── wsHandlers.js         # manejar eventos (join, leave, msg)
-│   │   └── wsEvents.js           # constantes de eventos
-│   │
-│   ├── utils/
-│   │   ├── generateUsername.js   # usuario temporal
-│   │   └── token.js              # utilidades JWT
-│   │
-│   ├── app.js                    # configuración principal de Express
-│   └── server.js                 # arranque del servidor HTTP + WS
-│
-├── .env
-├── package.json
-└── README.md
-client/
-│
-├── src/
-│   ├── api/
-│   │   └── auth.js              # login / register
-│   │   └── chat.js              # createChat / joinChat
-│   │
-│   ├── components/
-│   │   ├── ChatRoom.jsx         # vista del chat
-│   │   ├── ChatMessage.jsx      # cada msg
-│   │   └── InputMessage.jsx     # input para enviar
-│   │
-│   ├── context/
-│   │   ├── AuthContext.jsx      # manejar session
-│   │   └── ChatContext.jsx      # manejar mensajes del websocket
-│   │
-│   ├── hooks/
-│   │   └── useWebSocket.js      # conectar al WebSocket
-│   │
-│   ├── pages/
-│   │   ├── Login.jsx
-│   │   ├── Register.jsx
-│   │   ├── Dashboard.jsx        # crear/unirte a chats
-│   │   └── ChatRoomPage.jsx     # pantalla de chat
-│   │
-│   ├── utils/
-│   │   └── storage.js           # manejar tokens localStorage
-│   │
-│   ├── App.jsx
-│   ├── main.jsx
-│   └── styles/
-│       └── main.css
-│
-├── package.json
-└── vite.config.js
+```bash
+npm install google-auth-library jsonwebtoken cookie-parser express cors dotenv
+```
+
+Dependencias comunes en servidores con autenticación:
+
+* `google-auth-library` → para verificar el **ID token** de Google
+* `jsonwebtoken` → para crear JWT propios
+* `cookie-parser` → para manejar cookies de sesión
+* `express` → backend
+* `cors` → permitir peticiones desde el frontend
+* `dotenv` → leer variables del `.env`
+
+### **3.2 Si usas Socket.IO (para tu chat)**
+
+```bash
+npm install socket.io
+```
+
+---
+
+### **3.3 Dependencias del cliente (React)**
+
+Instalar si aún no lo tienes:
+
+```bash
+npm install axios
+```
+
+Y en tu HTML debes cargar Google Identity Services:
+
+```html
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+```
+
+---
+
+# ## **4. Flujo general de autenticación (resumen)**
+
+1. El frontend (React) muestra el botón de Google usando `VITE_GOOGLE_CLIENT_ID`.
+2. Google devuelve un **ID token**.
+3. El cliente envía ese ID token al backend vía `/auth/google`.
+4. El backend verifica el token usando `google-auth-library`.
+5. Si es válido:
+
+   * Crea una sesión (cookie)
+   * o genera un JWT para el cliente
+6. El frontend recibe ese JWT y se conecta al WebSocket usando ese token.
+
+---
+
+# ## **5. Script base de datos**
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  name VARCHAR(255),
+  google_id VARCHAR(255),
+  picture TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE chats (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
+  chat_id INTEGER REFERENCES chats(id),
+  content TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+
