@@ -2,14 +2,26 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Chat WebSocket</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>Chat Colaborativo</h2>
-  <div id="chat"></div>
+  <div class="container">
+    <header class="header">
+      <h2>Chat Colaborativo</h2>
+      <div id="status" class="status">Conectando...</div>
+    </header>
 
-  <input type="text" id="msg" placeholder="Escribe un mensaje...">
-  <button onclick="sendMessage()">Enviar</button>
+    <main class="chat-window">
+      <div id="chat" class="chat"></div>
+    </main>
+
+    <form id="form" class="input-area" onsubmit="sendMessage(); return false;">
+      <input type="text" id="msg" placeholder="Escribe un mensaje..." autocomplete="off">
+      <button type="submit">Enviar</button>
+    </form>
+  </div>
 
   <script src="app.js"></script>
 </body>

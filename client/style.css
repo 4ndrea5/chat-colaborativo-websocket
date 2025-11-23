@@ -1,0 +1,109 @@
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: #f4f6f8;
+  margin: 0;
+  padding: 20px;
+  color: #222;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+}
+
+.header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.status.connected {
+  color: #0a8a00;
+}
+
+.chat-window {
+  padding: 16px;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.chat {
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 8px;
+}
+
+.input-area {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid #eee;
+}
+
+.input-area input[type="text"] {
+  flex: 1 1 auto;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.input-area button {
+  padding: 10px 16px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.input-area button:hover { background: #155fa0; }
+
+.message { max-width: 80%; }
+
+.message.system {
+  align-self: center;
+  background: transparent;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.message.other { align-self: flex-start; }
+.message.self { align-self: flex-end; }
+
+.bubble {
+  background: #eee;
+  padding: 10px 12px;
+  border-radius: 12px;
+  display: inline-block;
+  font-size: 0.98rem;
+}
+
+.message.self .bubble { background: #1976d2; color: white; }
+
+.meta {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+@media (max-width: 600px) {
+  .container { height: 90vh; margin: 10px; }
+}
