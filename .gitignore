@@ -5,12 +5,12 @@ npm-debug.log*
 
 # Dependencias
 node_modules/
-Frontend/node_modules/
-Backend/node_modules/
+client/node_modules/
+server/node_modules/
 
 # Build
-Frontend/build/
-Backend/dist/
+client/build/
+server/dist/
 
 # Entornos
 .env
