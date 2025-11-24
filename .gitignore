@@ -1,0 +1,26 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependencias
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build
+client/build/
+server/dist/
+
+# Entornos
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+
+#google sevices
+google-service-account.json
+credentials_oauth.json
+token.json
